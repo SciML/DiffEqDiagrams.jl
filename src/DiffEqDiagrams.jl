@@ -2,10 +2,22 @@ module DiffEqDiagrams
 
 	using HTTP, JSON, Plots, Pkg
 
+	function _withtemp(f, file)
+	    try f(file)
+	    catch err
+	        rethrow()
+	    finally
+	        try rm(file; force = true)
+	        catch
+	        end
+	    end
+	end
+
+
 	function imgur(plt)
-		fn = tempname()
-		savefig(plt, fn);
-		img_imgur = open(fn); 
+		img_buffer = IOBuffer()
+		show(img_buffer, MIME("image/png"), plt)
+		img_imgur = String(take!(img_buffer))
 		r_imgur = HTTP.post("https://api.imgur.com/3/image", ["Authorization"=> "Client-ID $(GLOBAL_IMGUR_KEY)", "Accept"=> "application/json"], img_imgur);
 		JSON.parse(String(r_imgur.body))["data"]["link"]
 	end
