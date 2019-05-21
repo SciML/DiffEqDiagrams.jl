@@ -3,8 +3,9 @@ module DiffEqDiagrams
 	using HTTP, JSON, Plots, Pkg
 
 	function imgur(plt)
-		savefig(plt, "/tmp/plot.png");
-		img_imgur = open("/tmp/plot.png"); 
+		fn = tempname()
+		savefig(plt, fn);
+		img_imgur = open(fn); 
 		r_imgur = HTTP.post("https://api.imgur.com/3/image", ["Authorization"=> "Client-ID $(GLOBAL_IMGUR_KEY)", "Accept"=> "application/json"], img_imgur);
 		JSON.parse(String(r_imgur.body))["data"]["link"]
 	end
